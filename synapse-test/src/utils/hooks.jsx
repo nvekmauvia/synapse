@@ -18,7 +18,9 @@ export const useCreateNewNote = () => {
             id: notes.length,
             position,
             endPosition: new Vector3(position.x, position.y, position.z),
-            initialText: 'New Note Text' // Placeholder text
+            initialText: 'New Note Text', // Placeholder text
+            upstream: [],
+            downstream: [],
         };
 
         // Correctly updates the notes array by appending the new note
@@ -56,4 +58,14 @@ export const useLoadAll = () => {
     }
 
     return loadNotes
+}
+
+export const useRecalculatePositions = () => {
+    const { setShouldSetNotesPos } = useNotes()
+
+    const resetRecalculate = () => {
+        setShouldSetNotesPos(false)
+    }
+
+    return resetRecalculate
 }

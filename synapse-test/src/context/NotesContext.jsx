@@ -17,7 +17,9 @@ const initialNotes = () => {
             id: i,
             position,
             endPosition: new Vector3(position.x, position.y, position.z), // Starting with zero velocity
-            initialText: 'Miss you too bebebeb'
+            initialText: 'New Note Text', // Placeholder text
+            upstream: [], 
+            downstream: [],
         });
     }
     return notes;

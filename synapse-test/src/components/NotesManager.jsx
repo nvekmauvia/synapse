@@ -4,11 +4,16 @@ import * as THREE from 'three'
 import { useNotes } from '../context/NotesContext';
 
 const simulateEndState = (notes) => {
-    const maxIterations = 50; // Limit the simulation to prevent infinite loops
+    const maxIterations = 1; // Limit the simulation to prevent infinite loops
     const attractionCoefficient = 0.01;
-    const repulsionCoefficient = 0.15;
+    const repulsionCoefficient = 0.7;
     const desiredDistance = 1;
     const minDistance = 2;
+    const linkDesiredDistance = 0.2;
+    const linkMinDistance = 3;
+    const linkAttractionCoefficient = 0.2;
+
+    const axisWeights = { x: 1.0, y: 5, z: 0.4 }; // Customize these weights as needed
 
     for (let iteration = 0; iteration < maxIterations; iteration++) {
         let movement = false;
@@ -17,9 +22,14 @@ const simulateEndState = (notes) => {
             for (let j = i + 1; j < notes.length; j++) {
                 const noteA = notes[i];
                 const noteB = notes[j];
-                const direction = new THREE.Vector3().subVectors(noteB.endPosition, noteA.endPosition);
+                let direction = new THREE.Vector3().subVectors(noteB.endPosition, noteA.endPosition);
                 const distance = direction.length();
                 direction.normalize();
+                direction = new THREE.Vector3(
+                    direction.x * axisWeights.x,
+                    direction.y * axisWeights.y,
+                    direction.z * axisWeights.z
+                ).normalize();
 
                 if (distance < minDistance) {
                     const repulsion = direction.multiplyScalar(repulsionCoefficient * (minDistance - distance));
@@ -34,6 +44,35 @@ const simulateEndState = (notes) => {
                 }
             }
         }
+
+        // Apply attraction based on upstream-downstream relationships
+        notes.forEach(noteA => {
+            noteA.downstream.forEach(downstreamId => {
+                const noteB = notes.find(note => note.id === downstreamId);
+                console.log(noteB)
+                if (noteB) {
+                    const direction = new THREE.Vector3().subVectors(noteB.endPosition, noteA.endPosition);
+                    const distance = direction.length();
+                    direction.normalize();
+
+                    if (distance > linkDesiredDistance) {
+                        const attraction = direction.multiplyScalar(linkAttractionCoefficient * (distance - linkDesiredDistance));
+                        noteA.endPosition.add(attraction);
+                        noteB.endPosition.sub(attraction);
+                        movement = true;
+                    }
+
+                    // Ensure upstream note remains to the negative X-axis side of its downstream note
+                    if (distance < linkMinDistance) {
+                        const adjustX = Math.abs(noteA.endPosition.x - noteB.endPosition.x) / 2;
+                        noteA.endPosition.x -= adjustX;
+                        noteB.endPosition.x += adjustX;
+                        movement = true;
+                    }
+                }
+            });
+        });
+
 
         // Break out of the loop if no more movement (system reached equilibrium)
         if (!movement) break;
@@ -51,6 +90,16 @@ const NotesManager = ({ children }) => {
         })
         setShouldSetNotesPos(true)
     }
+
+    useEffect(() => {
+
+
+    }, [shouldSetNotesPos])
+
+    /*
+    setNotes(() => {
+        return simulateEndState(notes);
+    })*/
 
     // Function to smoothly update note positions towards their end positions
     const updatePositions = () => {

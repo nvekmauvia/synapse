@@ -10,7 +10,7 @@ const NoteObject = ({ position, noteReference }) => {
   const [isHovered, setIsHovered] = useState(false); // State to track hover
   const [isInputHovered, setInputHovered] = useState(false); // State to track hover
   const [inputScale, setInputScale] = useState(1);
-  const { notes, setNotes } = useNotes()
+  const { notes, setNotes, editingNote, setEditingNote } = useNotes()
 
   useFrame(({ camera }) => {
     meshRef.current.rotation.copy(camera.rotation);
@@ -23,10 +23,13 @@ const NoteObject = ({ position, noteReference }) => {
   });
 
   const onChangeText = (e) => {
-    //setText(e.target.value)
+    const updatedValue = e.target.value;
+    // Create a new array with updated note without mutating the original noteReference
+    setNotes(notes.map(note => note.id === noteReference.id ? { ...note, initialText: updatedValue } : note));
+  }
 
-    noteReference.initialText = e.target.value
-    setNotes(notes.map(note => note.id === noteReference.id ? { ...note, initialText: noteReference.initialText } : note));
+  const onClick = (e) => {
+    setEditingNote(noteReference)
   }
 
   return (
@@ -40,11 +43,12 @@ const NoteObject = ({ position, noteReference }) => {
         }
       }
       }
+      onClick={onClick}
     >
       <Plane args={[1, 1]}>
         <meshBasicMaterial color="#fff" side={DoubleSide} transparent={true} opacity={0.8} />
       </Plane>
-      {isHovered ?
+      {false ?
         (<Html scaleFactor={10}>
           <textarea
             style={{

@@ -6,8 +6,12 @@ import Skybox from './components/Skybox'
 
 import { NotesProvider } from './context/NotesContext'
 import OverlayGUI from './components/OverlayGUI'
+import ArrowIndicator from './components/ArrowIndicator'
+import EditNoteGUI from './components/EditNoteGUI'
+import NotesLinks from './components/NotesLinks'
 
 export const App = () => {
+ 
   return (
     <div style={{ position: 'relative', width: '100vw', height: '100vh' }}>
       <NotesProvider>
@@ -35,8 +39,11 @@ export const App = () => {
               </>
             )}
           </NotesManager>
+          <NotesLinks/>
+          <ArrowIndicator />
         </Canvas>
         <OverlayGUI />
+        <EditNoteGUI />
       </NotesProvider>
     </div>
   )
