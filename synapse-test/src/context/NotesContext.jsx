@@ -18,7 +18,7 @@ const initialNotes = () => {
             position,
             endPosition: new Vector3(position.x, position.y, position.z), // Starting with zero velocity
             initialText: 'New Note Text', // Placeholder text
-            upstream: [], 
+            upstream: [],
             downstream: [],
         });
     }
@@ -28,9 +28,10 @@ const initialNotes = () => {
 export const NotesProvider = ({ children }) => {
     const [notes, setNotes] = useState(initialNotes());
     const [editingNote, setEditingNote] = useState(null);
+    const [draggingNote, setDraggingNote] = useState(null);
     const [shouldSetNotesPos, setShouldSetNotesPos] = useState(false);
 
-    const value = { notes, setNotes, editingNote, setEditingNote, shouldSetNotesPos, setShouldSetNotesPos };
+    const value = { notes, setNotes, editingNote, setEditingNote, draggingNote, setDraggingNote, shouldSetNotesPos, setShouldSetNotesPos };
 
     return <NotesContext.Provider value={value}>{children}</NotesContext.Provider>;
 };

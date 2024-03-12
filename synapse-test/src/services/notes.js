@@ -4,7 +4,6 @@ const baseUrl = 'http://localhost:3001'
 
 const getAll = async () => {
     const response = await axios.get(`${baseUrl}/data`)
-    console.log(response)
     return response.data
 }
 
