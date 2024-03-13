@@ -7,19 +7,17 @@ const calculateMovement = (notes, draggingNote) => {
     const minCalcDistance = 5;
 
     const repulsionThresholdDistance = 2;
-    const repulsionStrength = 0.5;
+    const repulsionStrength = 0.2;
 
     const originAttractionStrength = 0.1;
 
     const linkDesiredDistance = 0.2;
-    const linkMinDistance = 2;
     const linkAttractionCoefficient = 0.2;
 
+    const linkMinDistance = 2;
     const linkRepulsionCoefficient = 2;
 
     const axisWeights = { x: 1.0, y: 3, z: 1 }; // Customize these weights as need ed
-
-    let movement = false;
 
     for (let i = 0; i < notes.length; i++) {
         for (let j = i + 1; j < notes.length; j++) {
@@ -44,17 +42,15 @@ const calculateMovement = (notes, draggingNote) => {
                 const repulsion = direction.multiplyScalar(repulsionStrength * (repulsionThresholdDistance - distance));
                 noteA.endPosition.sub(repulsion);
                 noteB.endPosition.add(repulsion);
-                movement = true;
             }
         }
         // Correctly create a vector pointing from the note's position towards the origin (0, 0, 0)
         let originDirection = new THREE.Vector3().subVectors(new THREE.Vector3(0, 0, 0), notes[i].endPosition);
-        const originDistance = originDirection.length();
         originDirection.normalize();
 
         // This applies a constant attraction towards the origin for each note
         const attraction = originDirection.multiplyScalar(originAttractionStrength);
-        notes[i].endPosition.add(attraction );
+        notes[i].endPosition.add(attraction);
     }
 
     // Apply attraction based on upstream-downstream relationships
@@ -71,7 +67,6 @@ const calculateMovement = (notes, draggingNote) => {
                     const attraction = direction.multiplyScalar(linkAttractionCoefficient * (distance - linkDesiredDistance));
                     noteUp.endPosition.add(attraction);
                     noteDown.endPosition.sub(attraction);
-                    movement = true;
                 }
 
                 // Ensure upstream note remains to the negative X-axis side of its downstream note
@@ -79,24 +74,13 @@ const calculateMovement = (notes, draggingNote) => {
                     const adjustX = Math.abs(noteUp.endPosition.x + linkMinDistance - noteDown.endPosition.x) / linkRepulsionCoefficient;
                     noteUp.endPosition.x -= adjustX;
                     noteDown.endPosition.x += adjustX;
-                    movement = true;
                 }
             }
         });
     });
 
     return notes.map(note => {
-        if (draggingNote !== null) {
-            if (note.id === draggingNote.id) {
-                //console.log(note.initialText)
-                return note;
-            } else {
-                return { ...note, endPosition: note.endPosition.clone() };
-            }
-        }
-        else {
-            return { ...note, endPosition: note.endPosition.clone() };
-        }
+        return { ...note, endPosition: note.endPosition.clone() };
     })
 };
 
