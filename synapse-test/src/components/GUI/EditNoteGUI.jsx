@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { useNotes } from '../context/NotesContext'; // Adjust import path as needed
+import { useNotes } from '../../context/NotesContext'; // Adjust import path as needed
 
 const EditNoteGUI = () => {
     const { notes, setNotes, editingNote, setEditingNote } = useNotes();

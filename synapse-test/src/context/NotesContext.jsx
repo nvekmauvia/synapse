@@ -30,8 +30,23 @@ export const NotesProvider = ({ children }) => {
     const [editingNote, setEditingNote] = useState(null);
     const [draggingNote, setDraggingNote] = useState(null);
     const [shouldSetNotesPos, setShouldSetNotesPos] = useState(false);
+    const [movingTimer, setMovingTimer] = useState(0.0);
+    const [moveFactor, setMoveFactor] = useState(1);
 
-    const value = { notes, setNotes, editingNote, setEditingNote, draggingNote, setDraggingNote, shouldSetNotesPos, setShouldSetNotesPos };
+    const value = {
+        notes,
+        setNotes,
+        editingNote,
+        setEditingNote,
+        draggingNote,
+        setDraggingNote,
+        shouldSetNotesPos,
+        setShouldSetNotesPos,
+        movingTimer,
+        setMovingTimer,
+        moveFactor,
+        setMoveFactor
+    };
 
     return <NotesContext.Provider value={value}>{children}</NotesContext.Provider>;
 };

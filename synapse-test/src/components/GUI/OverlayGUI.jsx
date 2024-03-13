@@ -1,5 +1,5 @@
 import React from 'react';
-import { useCreateNewNote, useLoadAll, useSaveAll, useRecalculatePositions } from '../utils/hooks';
+import { useCreateNewNote, useLoadAll, useSaveAll, useRecalculatePositions } from '../../utils/hooks';
 
 const OverlayGUI = () => {
     const createNewNote = useCreateNewNote();

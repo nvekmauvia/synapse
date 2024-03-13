@@ -5,13 +5,13 @@ import OrbitManager from './components/OrbitManager'
 import Skybox from './components/Skybox'
 
 import { NotesProvider } from './context/NotesContext'
-import OverlayGUI from './components/OverlayGUI'
+import OverlayGUI from './components/GUI/OverlayGUI'
 import ArrowIndicator from './components/ArrowIndicator'
-import EditNoteGUI from './components/EditNoteGUI'
+import EditNoteGUI from './components/GUI/EditNoteGUI'
 import NotesLinks from './components/NotesLinks'
 
 export const App = () => {
- 
+
   return (
     <div style={{ position: 'relative', width: '100vw', height: '100vh' }}>
       <NotesProvider>
@@ -39,7 +39,7 @@ export const App = () => {
               </>
             )}
           </NotesManager>
-          <NotesLinks/>
+          <NotesLinks />
           <ArrowIndicator />
         </Canvas>
         <OverlayGUI />
