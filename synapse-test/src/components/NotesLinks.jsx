@@ -1,9 +1,13 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useRef } from 'react';
 import { Cylinder } from '@react-three/drei';
 import * as THREE from 'three';
 import { useNotes } from '../context/NotesContext'; // Adjust import path as needed
+import { useFrame } from '@react-three/fiber';
 
 const LinkLine = ({ start, end }) => {
+  const meshRef = useRef();
+  const [isHovered, setIsHovered] = useState(false); // State to track hover
+
   const orientation = useMemo(() => {
     // Vector pointing from start to end
     const direction = new THREE.Vector3().subVectors(end, start);
@@ -20,13 +24,30 @@ const LinkLine = ({ start, end }) => {
     return { midPoint, length, quaternion };
   }, [start, end]);
 
+  useFrame(() => {
+    if (meshRef.current) {
+      const materialColor = meshRef.current.material.color; // Directly reference the material's color
+      const startColor = new THREE.Color("#555");
+      const endColor = new THREE.Color("#ffa500");
+
+      if (isHovered) {
+        materialColor.lerp(endColor, 0.8); // Interpolate towards endColor when hovered
+      } else {
+        materialColor.lerp(startColor, 0.1); // Interpolate towards startColor when not hovered
+      }
+    }
+  });
+
   return (
     <Cylinder
+      ref={meshRef}
       args={[0.02, 0.02, orientation.length, 8]} // Adjust the radius and segment count as needed
       position={orientation.midPoint}
       quaternion={orientation.quaternion}
+      onPointerEnter={(e) => setIsHovered(true)}
+      onPointerLeave={(e) => setIsHovered(false)}
     >
-      <meshStandardMaterial attach="material" color="black" />
+      <meshStandardMaterial attach="material" color="white" transparent="false" />
     </Cylinder>
   );
 };

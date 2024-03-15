@@ -32,7 +32,6 @@ const EditNoteGUI = () => {
     const handleSaveLinks = () => onSave(safeEditingNote.id, selectedUpstream, selectedDownstream);
 
     const onSave = (noteId, selectedUpstream, selectedDownstream) => {
-
         setNotes(prevNotes => prevNotes.map(note => {
             // Update upstream and downstream for the current note
             if (note.id === noteId) {
@@ -40,12 +39,17 @@ const EditNoteGUI = () => {
             }
             // Add this note as downstream to its new upstream notes and remove from old ones
             if (selectedUpstream.includes(note.id)) {
-                return { ...note, downstream: [...note.downstream, noteId].filter((value, index, self) => self.indexOf(value) === index) }; // Ensure no duplicates
+                return { ...note, downstream: Array.from(new Set([...note.downstream, noteId])) }; // Ensure no duplicates using Set
             } else {
                 return { ...note, downstream: note.downstream.filter(id => id !== noteId) };
             }
-            // Add this note as upstream to its new downstream notes and remove from old ones (similar logic as above)
-            // This part will be similar to the upstream update but applied to downstream relations
+        }).map(note => {
+            // Add this note as upstream to its new downstream notes and remove from old ones
+            if (selectedDownstream.includes(note.id)) {
+                return { ...note, upstream: Array.from(new Set([...note.upstream, noteId])) }; // Ensure no duplicates using Set
+            } else {
+                return { ...note, upstream: note.upstream.filter(id => id !== noteId) };
+            }
         }));
     };
 

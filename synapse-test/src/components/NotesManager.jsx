@@ -3,7 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three'
 import { useNotes } from '../context/NotesContext';
 
-const calculateMovement = (notes, draggingNote) => {
+const calculateMovement = (notes) => {
     const minCalcDistance = 5;
 
     const repulsionThresholdDistance = 2;
@@ -17,16 +17,17 @@ const calculateMovement = (notes, draggingNote) => {
     const linkMinDistance = 2;
     const linkRepulsionCoefficient = 2;
 
-    const axisWeights = { x: 1.0, y: 3, z: 1 }; // Customize these weights as need ed
+    const axisWeights = { x: 1.0, y: 2 , z: 1 }; // Customize these weights as need ed
 
     for (let i = 0; i < notes.length; i++) {
+        // General note flocking
         for (let j = i + 1; j < notes.length; j++) {
             const noteA = notes[i];
             const noteB = notes[j];
             let direction = new THREE.Vector3().subVectors(noteB.position, noteA.endPosition);
             const distance = direction.length();
 
-            // only calculate if close enough
+            // Only calculate if close enough
             if (distance > minCalcDistance) {
                 break
             }
@@ -44,11 +45,11 @@ const calculateMovement = (notes, draggingNote) => {
                 noteB.endPosition.add(repulsion);
             }
         }
-        // Correctly create a vector pointing from the note's position towards the origin (0, 0, 0)
+        
+        // Attraction to origin
         let originDirection = new THREE.Vector3().subVectors(new THREE.Vector3(0, 0, 0), notes[i].endPosition);
         originDirection.normalize();
 
-        // This applies a constant attraction towards the origin for each note
         const attraction = originDirection.multiplyScalar(originAttractionStrength);
         notes[i].endPosition.add(attraction);
     }
@@ -63,6 +64,7 @@ const calculateMovement = (notes, draggingNote) => {
                 const distance = direction.length();
                 direction.normalize();
 
+                // Links pull notes together
                 if (distance > linkDesiredDistance) {
                     const attraction = direction.multiplyScalar(linkAttractionCoefficient * (distance - linkDesiredDistance));
                     noteUp.endPosition.add(attraction);
@@ -85,7 +87,7 @@ const calculateMovement = (notes, draggingNote) => {
 };
 
 const NotesManager = ({ children }) => {
-    const { notes, setNotes, draggingNote, movingTimer, setMovingTimer, moveFactor, setMoveFactor } = useNotes();
+    const { notes, setNotes, movingTimer, setMovingTimer, moveFactor, setMoveFactor } = useNotes();
 
     // Function to smoothly update note positions towards their end positions
     const updatePositions = () => {
@@ -94,7 +96,7 @@ const NotesManager = ({ children }) => {
                 if (!note.endPosition) {
                     return note;
                 }
-                note.position.lerp(note.endPosition, 0.2); // Adjust the lerp factor as needed
+                note.position.lerp(note.endPosition, 0.2)
                 return { ...note };
             })
         );
@@ -114,7 +116,7 @@ const NotesManager = ({ children }) => {
         }
 
         // Calculate movement
-        setNotes(() => { return calculateMovement(notes, draggingNote) })
+        setNotes(() => { return calculateMovement(notes) })
 
         updatePositions();
     })

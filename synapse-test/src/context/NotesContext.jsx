@@ -1,6 +1,7 @@
 // NotesContext.js
 import React, { createContext, useContext, useState } from 'react';
 import { Vector3 } from 'three';
+import { v4 as uuidv4 } from 'uuid';
 
 const NotesContext = createContext();
 
@@ -14,7 +15,7 @@ const initialNotes = () => {
             Math.random() * 5 - 2.5  // Z axis
         );
         notes.push({
-            id: i,
+            id: uuidv4(),
             position,
             endPosition: new Vector3(position.x, position.y, position.z), // Starting with zero velocity
             initialText: 'New Note Text', // Placeholder text
@@ -29,7 +30,7 @@ export const NotesProvider = ({ children }) => {
     const [notes, setNotes] = useState(initialNotes());
     const [editingNote, setEditingNote] = useState(null);
     const [draggingNote, setDraggingNote] = useState(null);
-    const [shouldSetNotesPos, setShouldSetNotesPos] = useState(false);
+    const [clickedNote, setClickedNote] = useState(false);
     const [movingTimer, setMovingTimer] = useState(0.0);
     const [moveFactor, setMoveFactor] = useState(1);
 
@@ -38,10 +39,10 @@ export const NotesProvider = ({ children }) => {
         setNotes,
         editingNote,
         setEditingNote,
+        clickedNote,
+        setClickedNote,
         draggingNote,
         setDraggingNote,
-        shouldSetNotesPos,
-        setShouldSetNotesPos,
         movingTimer,
         setMovingTimer,
         moveFactor,

@@ -1,9 +1,11 @@
+import { useCallback, useContext } from 'react';
 import { Vector3 } from 'three';
 import { useNotes } from '../context/NotesContext';
 import noteService from '../services/notes';
+import { v4 as uuidv4 } from 'uuid';
 
 export const useCreateNewNote = () => {
-    const { notes, setNotes, setShouldSetNotesPos } = useNotes();
+    const { notes, setNotes } = useNotes();
 
     const createNewNote = () => {
         console.log('Creating new note...');
@@ -15,7 +17,7 @@ export const useCreateNewNote = () => {
         );
 
         const newNote = {
-            id: notes.length,
+            id: uuidv4(),
             position,
             endPosition: new Vector3(position.x, position.y, position.z),
             initialText: 'New Note Text', // Placeholder text
@@ -25,7 +27,6 @@ export const useCreateNewNote = () => {
 
         // Correctly updates the notes array by appending the new note
         setNotes([...notes, newNote]);
-        setShouldSetNotesPos(false);
     };
 
     return createNewNote;
@@ -60,12 +61,20 @@ export const useLoadAll = () => {
     return loadNotes
 }
 
-export const useRecalculatePositions = () => {
-    const { setShouldSetNotesPos } = useNotes()
+export const useEditNoteText = () => {
+    const { setNotes } = useNotes();
 
-    const resetRecalculate = () => {
-        setShouldSetNotesPos(false)
-    }
+    // useCallback will return a memoized version of the callback that only changes if one of the dependencies has changed
+    const editNoteText = useCallback((noteId, newText) => {
+        setNotes(currentNotes =>
+            currentNotes.map(note => note.id === noteId ? { ...note, initialText: newText } : note)
+        );
+    }, [setNotes]); // setNotes is a stable function reference from context and will not change
 
-    return resetRecalculate
-}
+    return editNoteText;
+};
+
+export const useCreateNoteLink = (upstreamId, downstreamId) => {
+    const { notes, setNotes } = useNotes();
+    // Logic to handle link editing
+};
