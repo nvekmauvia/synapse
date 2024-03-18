@@ -4,6 +4,8 @@ import { App } from './App';
 import { NotesProvider } from './context/NotesContext';
 import { InputProvider } from './context/InputContext';
 import { Canvas } from '@react-three/fiber'
+import OverlayGUI from './components/GUI/OverlayGUI';
+import DebugGUI from './components/GUI/DebugGUI';
 
 createRoot(document.getElementById('root')).render(
   < NotesProvider >
@@ -21,6 +23,8 @@ createRoot(document.getElementById('root')).render(
           <App />
         </Canvas>
       </div>
+      <OverlayGUI />
+      <DebugGUI />
     </InputProvider>
   </NotesProvider >
 )

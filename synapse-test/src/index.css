@@ -27,3 +27,8 @@ body,
   /* Ensure it spans the desired area */
   height: 100%;
 }
+
+.draftEditor-root {
+  min-height: 100px; /* Ensure it has a minimum height */
+  width: 100%; /* Adjust width as needed */
+}

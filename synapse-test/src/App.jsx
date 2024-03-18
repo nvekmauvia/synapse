@@ -33,7 +33,6 @@ export const App = () => {
       </NotesManager>
       <NotesLinks />
       <ArrowIndicator />
-      <OverlayGUI />
     </>
   )
 };

@@ -3,13 +3,16 @@ import { Vector2, Raycaster } from 'three';
 import { useEffect } from 'react';
 import { useInput } from '../context/InputContext';
 import { useNotes } from '../context/NotesContext';
+import { useDeleteNote } from '../utils/hooks';
 
 export const useSetupInputManager = () => {
-    const { setCameraControlsOn, setHoveredNote } = useInput();
-    const { editingNote, setEditingNote, clickedNote } = useNotes();
+    const { cameraControlsOn, setCameraControlsOn, setHoveredNote, setHoveredButton } = useInput();
+    const { editingNoteId, setEditingNoteId, clickedNote, selectedNoteId, setSelectedNoteId } = useNotes();
 
     const raycaster = new Raycaster();
     const mousePosition = new Vector2();
+
+    const deleteNote = useDeleteNote();
 
     // Mouse Hover
     useFrame(({ camera, scene, mouse }) => {
@@ -20,11 +23,23 @@ export const useSetupInputManager = () => {
         raycaster.setFromCamera(mousePosition, camera);
         const intersects = raycaster.intersectObjects(scene.children, true);
         const hoveredNoteObject = intersects.find(intersect => intersect.object.userData.noteReferenceId);
+        const hoveredButtonObject = intersects.find(intersect => intersect.object.userData.buttonReferenceId);
 
-        if (hoveredNoteObject) {
-            setHoveredNote(hoveredNoteObject.object.userData.noteReferenceId);
-        } else {
+        if (!cameraControlsOn) {
+            if (hoveredNoteObject) {
+                setHoveredNote(hoveredNoteObject.object.userData.noteReferenceId);
+            } else {
+                setHoveredNote(null);
+            }
+            if (hoveredButtonObject) {
+                setHoveredButton(hoveredButtonObject.object.userData.buttonReferenceId);
+            } else {
+                setHoveredButton(null);
+            }
+        }
+        else {
             setHoveredNote(null);
+            setHoveredButton(null);
         }
     });
 
@@ -32,7 +47,9 @@ export const useSetupInputManager = () => {
     useEffect(() => {
         const handleDocumentClick = () => {
             if (!clickedNote) {
-                setEditingNote(null);
+                //console.log(selectedNote)
+                setEditingNoteId(null);
+                setSelectedNoteId(null)
             }
         };
         document.addEventListener('click', handleDocumentClick);
@@ -40,25 +57,32 @@ export const useSetupInputManager = () => {
         return () => {
             document.removeEventListener('click', handleDocumentClick);
         };
-    }, [clickedNote, setEditingNote]);
+    }, [clickedNote, setEditingNoteId, setSelectedNoteId, selectedNoteId]);
 
     // Key inputs
     useEffect(() => {
         const handleKeyDown = (event) => {
             // Camera Controls
             if (event.code === 'Space') {
-                if (editingNote === null) {
+                if (editingNoteId === null) {
                     setCameraControlsOn(true);
                 }
             }
             // Deselecting editor
             if (event.code === 'Escape') {
-                setEditingNote(null)
+                setEditingNoteId(null)
+                setSelectedNoteId(null)
             }
             if (event.code === 'Enter' && event.ctrlKey) {
-                setEditingNote(null);
+                setEditingNoteId(null);
             }
-        };
+            if (event.code === 'Delete') {
+                if (selectedNoteId && editingNoteId === null) {
+                    deleteNote(selectedNoteId)
+                }
+            }
+        }
+
         const handleKeyUp = (event) => {
             // Camera Controls
             if (event.code === 'Space') {
@@ -74,5 +98,5 @@ export const useSetupInputManager = () => {
             window.removeEventListener('keydown', handleKeyDown);
             window.removeEventListener('keyup', handleKeyUp);
         };
-    }, [setCameraControlsOn, setEditingNote, editingNote]);
+    }, [setCameraControlsOn, setEditingNoteId, setSelectedNoteId, editingNoteId, selectedNoteId, deleteNote]);
 };

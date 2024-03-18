@@ -8,13 +8,11 @@ const OverlayGUI = () => {
     const loadNotes = useLoadAll();
 
     return (
-        <Html>
             <div className="overlay-gui">
                 <button onClick={createNewNote}>New Note</button>
                 <button onClick={saveNotes}>Save</button>
                 <button onClick={loadNotes}>Load</button>
             </div>
-        </Html>
     );
 };
 

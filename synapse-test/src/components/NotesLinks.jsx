@@ -24,6 +24,11 @@ const LinkLine = ({ start, end }) => {
     return { midPoint, length, quaternion };
   }, [start, end]);
 
+  const onClick = (event) => {
+    event.stopPropagation();
+    //setSelectedLink(noteReference)
+  }
+
   useFrame(() => {
     if (meshRef.current) {
       const materialColor = meshRef.current.material.color; // Directly reference the material's color
