@@ -6,12 +6,15 @@ import { DoubleSide } from 'three';
 import { useInput } from '../context/InputContext';
 import { useNotes } from '../context/NotesContext';
 import { useEditNoteText } from '../utils/hooks';
+import { BoxGeometry, MeshBasicMaterial, Mesh } from 'three';
+import LinkButton from './LinkButton';
 
 const NoteObject = ({ position, noteReference }) => {
   const meshRef = useRef();
   const { camera, gl, pointer } = useThree();
   const [isDragging, setIsDragging] = useState(false);
   const [wasEditing, setWasEditing] = useState(false);
+
   const [meshColor, setMeshColor] = useState(new THREE.Color("#ffa500"));
   const {
     setNotes,
@@ -25,7 +28,7 @@ const NoteObject = ({ position, noteReference }) => {
   } = useNotes()
   const {
     hoveredNote,
-    setLinkingNote,
+    hoveredButton
   } = useInput()
   const planeRef = useRef(new THREE.Plane());
   const raycaster = new THREE.Raycaster();
@@ -37,13 +40,19 @@ const NoteObject = ({ position, noteReference }) => {
   // Assign the noteReference to the mesh object for identification in the raycaster
   useEffect(() => {
     if (meshRef.current) {
+      // Main plane
       meshRef.current.children[0].userData.noteReferenceId = noteReference.id;
+      console.log(meshRef)
     }
   }, [noteReference.id]);
 
   const startDragging = useCallback((event) => {
+    if (hoveredButton !== null) {
+      return;
+    }
+
     setIsDragging(true);
-    //event.stopPropagation();
+    event.stopPropagation();
 
     window.addEventListener('mouseup', stopDraggingGlobal, { once: true });
 
@@ -102,7 +111,7 @@ const NoteObject = ({ position, noteReference }) => {
   };
 
   const onDoubleClick = (event) => {
-    //event.stopPropagation();
+    event.stopPropagation();
     setClickedNote(noteReference)
     setEditingNoteId(noteReference.id)
     setWasEditing(true)
@@ -110,7 +119,7 @@ const NoteObject = ({ position, noteReference }) => {
   }
 
   const onClick = (event) => {
-    //event.stopPropagation();
+    event.stopPropagation();
     setTimeout(() => {
       if (editingNoteId && noteReference.id === editingNoteId) {
         setClickedNote(noteReference)
@@ -170,52 +179,6 @@ const NoteObject = ({ position, noteReference }) => {
     }
   });
 
-  // Button
-  const CircleButton = ({ position }) => {
-    const circMeshRef = useRef();
-
-    const handlePointerOver = (e) => {
-      e.stopPropagation();
-      circMeshRef.current.material.color.set("#FF0000"); // Set color to red
-    };
-
-    const handlePointerOut = (e) => {
-      console.log('out!')
-      e.stopPropagation();
-      circMeshRef.current.material.color.set("#00FF00"); // Set color back to green
-    };
-
-    useEffect(() => {
-      if (circMeshRef.current) {
-        circMeshRef.current.userData.buttonReferenceId = noteReference.id;
-      }
-    }, [noteReference.id]);
-
-    return (
-      <mesh
-        ref={circMeshRef}
-        position={position}
-        onPointerOver={() => {
-          console.log('!!!')
-        }}
-        onPointerOut={handlePointerOut}
-        onPointerDown={OnClickLinkButton}
-      >
-        <circleGeometry args={[0.2, 32]} />
-        <meshBasicMaterial color={"#00FF00"} />
-      </mesh>
-    );
-  };
-
-  const OnClickLinkButton = (event) => {
-    //event.stopPropagation()
-    console.log('AC')
-    setLinkingNote(noteReference.id)
-  }
-
-  const leftButtonPosition = new THREE.Vector3(-0.45, 0, 0.1);
-  const rightButtonPosition = new THREE.Vector3(0.45, 0, 0.1);
-
   return (
     <mesh
       ref={meshRef}
@@ -229,17 +192,7 @@ const NoteObject = ({ position, noteReference }) => {
       <Plane args={[1, 1]}>
         <meshBasicMaterial color={meshColor} side={DoubleSide} transparent={true} opacity={0.8} />
       </Plane>
-      {(hoveredNote === noteReference.id) && (
-        <Html position={[0, 0, 0.1]} transform occlude
-        style={{
-          pointerEvents: "none", // Make this div invisible to clicks    
-        }}
-        >
-          <button onClick={OnClickLinkButton} style={{ cursor: 'pointer' }}>
-            Link
-          </button>
-        </Html>
-      )}
+      <LinkButton noteReference={noteReference} />
       <Html scaleFactor={10} center
         style={{
           width: `${100}px`, // Adjust based on the actual size of your Plane
@@ -283,7 +236,6 @@ const NoteObject = ({ position, noteReference }) => {
             {noteReference.text}
           </Text>
         )}
-
     </mesh>
   );
 }

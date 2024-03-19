@@ -4,12 +4,15 @@ import { useInput } from '../../context/InputContext';
 
 const DebugGUI = () => {
     const { editingNoteId, selectedNoteId, draggingNote, notes } = useNotes();
-    const { hoveredNote, hoveredButton } = useInput();
+    const { hoveredNote, hoveredButton, linkingNote } = useInput();
 
     const editText = notes.find(note => note.id === editingNoteId)?.text;
     const selectText = notes.find(note => note.id === selectedNoteId)?.text;
     const hoveredText = notes.find(note => note.id === hoveredNote)?.text;
     const buttonText = hoveredButton;
+    const linkingText = notes.find(note => note.id === linkingNote)?.text;
+
+    //console.log(linkingText)
 
     return (
         <div style={{ position: 'fixed', top: 0, left: 0, backgroundColor: 'rgba(0,0,0,0.7)', color: 'white', padding: '10px', zIndex: 1000 }}>
@@ -18,6 +21,7 @@ const DebugGUI = () => {
             <pre>Hovered: {JSON.stringify(hoveredText, null, 2)}</pre>
             <pre>Button: {JSON.stringify(buttonText, null, 2)}</pre>
             <pre>Dragged: {JSON.stringify(draggingNote?.text, null, 2)}</pre>
+            <pre>Linking: {JSON.stringify(linkingText, null, 2)}</pre>
         </div>
     );
 };

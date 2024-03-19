@@ -6,7 +6,7 @@ export const InputProvider = ({ children }) => {
     const [cameraControlsOn, setCameraControlsOn] = useState(false);
     const [hoveredNote, setHoveredNote] = useState(null);
     const [hoveredButton, setHoveredButton] = useState(null);
-    const [linkingNote, setLinkingNote] = useState(false);
+    const [linkingNote, setLinkingNote] = useState(null);
 
     const value = {
         cameraControlsOn,

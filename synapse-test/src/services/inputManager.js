@@ -22,7 +22,7 @@ export const useSetupInputManager = () => {
 
         raycaster.setFromCamera(mousePosition, camera);
         const intersects = raycaster.intersectObjects(scene.children, true);
-        const hoveredNoteObject = intersects.find(intersect => intersect.object.userData.noteReferenceId);
+        const hoveredNoteObject = intersects.find(intersect => intersect.object.userData.noteReferenceId && !intersect.object.userData.ignoreRaycast);
         const hoveredButtonObject = intersects.find(intersect => intersect.object.userData.buttonReferenceId);
 
         if (!cameraControlsOn) {
