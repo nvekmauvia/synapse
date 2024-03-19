@@ -6,8 +6,8 @@ import { DoubleSide } from 'three';
 import { useInput } from '../context/InputContext';
 import { useNotes } from '../context/NotesContext';
 import { useEditNoteText } from '../utils/hooks';
-import { BoxGeometry, MeshBasicMaterial, Mesh } from 'three';
 import LinkButton from './LinkButton';
+import pinIcon from '../assets/svg/pin-icon.svg'
 
 const NoteObject = ({ position, noteReference }) => {
   const meshRef = useRef();
@@ -50,6 +50,7 @@ const NoteObject = ({ position, noteReference }) => {
     if (hoveredButton !== null) {
       return;
     }
+    if (event.button !== 0) return;
 
     setIsDragging(true);
     event.stopPropagation();
@@ -106,11 +107,25 @@ const NoteObject = ({ position, noteReference }) => {
     }
   }, [camera, isDragging, pointer, setNotes, noteReference.id, raycaster]);
 
+  const handleRightClick = (event) => {
+    event.stopPropagation(); // Stop the event from bubbling up
+
+    setNotes((currentNotes) => {
+      return currentNotes.map((n) => {
+        if (n.id === noteReference.id) {
+          return { ...n, isPinned: !n.isPinned }; // Toggle the isPinned state
+        }
+        return n;
+      });
+    });
+  };
+
   const onChange = (event) => {
     setLocalText(event.target.value);
   };
 
   const onDoubleClick = (event) => {
+    if (event.button !== 0) return;
     event.stopPropagation();
     setClickedNote(noteReference)
     setEditingNoteId(noteReference.id)
@@ -119,6 +134,7 @@ const NoteObject = ({ position, noteReference }) => {
   }
 
   const onClick = (event) => {
+    if (event.button !== 0) return;
     event.stopPropagation();
     setTimeout(() => {
       if (editingNoteId && noteReference.id === editingNoteId) {
@@ -188,10 +204,16 @@ const NoteObject = ({ position, noteReference }) => {
       onPointerDown={startDragging}
       onPointerUp={stopDragging}
       onPointerMove={dragNote}
+      onContextMenu={handleRightClick}
     >
       <Plane args={[1, 1]}>
         <meshBasicMaterial color={meshColor} side={DoubleSide} transparent={true} opacity={0.8} />
       </Plane>
+      {noteReference.isPinned && (
+        <Html position={[0.3, 0.5, 0]} scaleFactor={10}>
+          <img src={pinIcon} style={{ width: '20px', height: '20px', color: 'red' }} alt="pinned" />
+        </Html>
+      )}
       <LinkButton noteReference={noteReference} isDownLink={true} />
       <LinkButton noteReference={noteReference} isDownLink={false} />
       <Html scaleFactor={10} center

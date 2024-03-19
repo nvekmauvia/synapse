@@ -93,7 +93,7 @@ const NotesManager = ({ children }) => {
     const updatePositions = () => {
         setNotes(currentNotes =>
             currentNotes.map(note => {
-                if (!note.endPosition) {
+                if (!note.endPosition || note.isPinned) {
                     return note;
                 }
                 note.position.lerp(note.endPosition, 0.2)

@@ -1,3 +1,4 @@
+import React, { useEffect } from 'react';
 import NotesManager from "./components/NotesManager"
 import NoteObject from "./components/NoteObject"
 import OrbitManager from './components/OrbitManager'
@@ -10,6 +11,17 @@ import LinkManager from './components/LinkManager'
 export const App = () => {
   // Input Manager
   useSetupInputManager();
+  useEffect(() => {
+    const handleRightClick = (event) => {
+      event.preventDefault(); // Prevent the context menu from appearing
+    };
+
+    window.addEventListener('contextmenu', handleRightClick);
+
+    return () => {
+      window.removeEventListener('contextmenu', handleRightClick);
+    };
+  }, []);
 
   return (
     <>

@@ -20,6 +20,7 @@ const initialNotes = () => {
             text: 'New Note Text', // Placeholder text
             upstream: [],
             downstream: [],
+            isPinned: false
         });
     }
     return notes;

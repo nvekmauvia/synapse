@@ -16,6 +16,7 @@ const LinkButton = ({ noteReference, isDownLink }) => {
     } = useInput()
 
     const startDragging = useCallback((event) => {
+        if (event.button !== 0) return;
         setLinkingNote(noteReference.id)
         setLinkingDown(isDownLink)
         // Add a global mouseup listener when dragging starts

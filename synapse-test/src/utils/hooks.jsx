@@ -23,6 +23,7 @@ export const useCreateNewNote = () => {
             text: 'New Note Text', // Placeholder text
             upstream: [],
             downstream: [],
+            isPinned: false
         };
 
         // Correctly updates the notes array by appending the new note
