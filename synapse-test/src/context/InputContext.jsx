@@ -7,6 +7,7 @@ export const InputProvider = ({ children }) => {
     const [hoveredNote, setHoveredNote] = useState(null);
     const [hoveredButton, setHoveredButton] = useState(null);
     const [linkingNote, setLinkingNote] = useState(null);
+    const [linkingDown, setLinkingDown] = useState(false);
 
     const value = {
         cameraControlsOn,
@@ -17,6 +18,8 @@ export const InputProvider = ({ children }) => {
         setHoveredButton,
         linkingNote,
         setLinkingNote,
+        linkingDown,
+        setLinkingDown,
     };
 
     return <InputContext.Provider value={value}>{children}</InputContext.Provider>;

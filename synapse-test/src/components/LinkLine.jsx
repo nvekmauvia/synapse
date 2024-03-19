@@ -1,12 +1,18 @@
 import React, { useMemo, useState, useRef } from 'react';
 import { Cylinder } from '@react-three/drei';
 import * as THREE from 'three';
-import { useNotes } from '../context/NotesContext'; // Adjust import path as needed
 import { useFrame } from '@react-three/fiber';
+import { useNotes } from '../context/NotesContext';
 
-const LinkLine = ({ start, end }) => {
+export const LinkLine = ({ start, end, linkId }) => {
   const meshRef = useRef();
   const [isHovered, setIsHovered] = useState(false); // State to track hover
+
+  const {
+    setSelectedLink,
+    selectedLink,
+    setClickedNote
+  } = useNotes()
 
   const orientation = useMemo(() => {
     // Vector pointing from start to end
@@ -26,19 +32,27 @@ const LinkLine = ({ start, end }) => {
 
   const onClick = (event) => {
     event.stopPropagation();
-    //setSelectedLink(noteReference)
-  }
+    setSelectedLink(linkId)
+    setClickedNote(true)
+    console.log(linkId)
+  };
 
   useFrame(() => {
     if (meshRef.current) {
       const materialColor = meshRef.current.material.color; // Directly reference the material's color
       const startColor = new THREE.Color("#555");
       const endColor = new THREE.Color("#ffa500");
+      const selectedColor = new THREE.Color("red");
+
+      const isSelected = selectedLink === linkId
 
       if (isHovered) {
         materialColor.lerp(endColor, 0.8); // Interpolate towards endColor when hovered
       } else {
         materialColor.lerp(startColor, 0.1); // Interpolate towards startColor when not hovered
+      }
+      if (isSelected) {
+        materialColor.lerp(selectedColor, 0.8); // Interpolate towards endColor when hovered
       }
     }
   });
@@ -51,36 +65,9 @@ const LinkLine = ({ start, end }) => {
       quaternion={orientation.quaternion}
       onPointerEnter={(e) => setIsHovered(true)}
       onPointerLeave={(e) => setIsHovered(false)}
+      onClick={onClick}
     >
       <meshStandardMaterial attach="material" color="white" transparent="false" />
     </Cylinder>
   );
 };
-
-const NotesLinks = () => {
-  const { notes } = useNotes();
-
-  // Assuming each note has a `position` object and optionally `downstream` array
-  return (
-    <>
-      {notes.map(note => (
-        note.downstream.map(downstreamId => {
-          const downstreamNote = notes.find(n => n.id === downstreamId);
-          if (!downstreamNote) return null; // In case the downstream note isn't found
-
-          const startPosition = new THREE.Vector3().copy(note.position);
-          const endPosition = new THREE.Vector3().copy(downstreamNote.position);
-
-          // Adjust start and end positions to account for connections starting and ending at the edges of the notes
-          startPosition.x += 0.5; // Assuming the note's width is 1 unit
-          endPosition.x -= 0.5;
-
-          return <LinkLine key={`${note.id}-${downstreamId}`} start={startPosition} end={endPosition} />;
-        })
-      ))}
-    </>
-  );
-};
-
-
-export default NotesLinks

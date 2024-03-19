@@ -7,17 +7,17 @@ const calculateMovement = (notes) => {
     const minCalcDistance = 5;
 
     const repulsionThresholdDistance = 2;
-    const repulsionStrength = 0.2;
+    const repulsionStrength = 0.4;
 
     const originAttractionStrength = 0.1;
 
     const linkDesiredDistance = 0.2;
-    const linkAttractionCoefficient = 0.2;
+    const linkAttractionCoefficient = 0.05;
 
-    const linkMinDistance = 2;
+    const linkMinDistance = 2.3;
     const linkRepulsionCoefficient = 2;
 
-    const axisWeights = { x: 1.0, y: 2 , z: 1 }; // Customize these weights as need ed
+    const axisWeights = { x: 1.0, y: 1.5 , z: 1 }; // Customize these weights as need ed
 
     for (let i = 0; i < notes.length; i++) {
         // General note flocking

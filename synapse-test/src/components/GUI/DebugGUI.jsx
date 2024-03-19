@@ -3,7 +3,7 @@ import { useNotes } from '../../context/NotesContext';
 import { useInput } from '../../context/InputContext';
 
 const DebugGUI = () => {
-    const { editingNoteId, selectedNoteId, draggingNote, notes } = useNotes();
+    const { editingNoteId, selectedNoteId, draggingNote, notes, selectedLink } = useNotes();
     const { hoveredNote, hoveredButton, linkingNote } = useInput();
 
     const editText = notes.find(note => note.id === editingNoteId)?.text;

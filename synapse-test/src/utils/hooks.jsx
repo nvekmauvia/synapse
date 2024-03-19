@@ -32,6 +32,41 @@ export const useCreateNewNote = () => {
     return createNewNote;
 };
 
+export const useDeleteNote = () => {
+    const { notes, setNotes, setSelectedNoteId } = useNotes();
+
+    const deleteNote = useCallback((deleteNoteId) => {
+        setNotes(currentNotes => {
+            // First, find the note to be deleted
+            const noteToDelete = currentNotes.find(note => note.id === deleteNoteId);
+            if (!noteToDelete) return currentNotes; // If not found, return the current state
+
+            // Prepare arrays to hold IDs of notes to update
+            const idsToUpdate = new Set([...noteToDelete.upstream, ...noteToDelete.downstream]);
+
+            // Filter out the note to be deleted
+            const notesWithoutDeleted = currentNotes.filter(note => note.id !== deleteNoteId);
+
+            // Update upstream and downstream links only for related notes
+            const updatedNotes = notesWithoutDeleted.map(note => {
+                if (idsToUpdate.has(note.id)) {
+                    return {
+                        ...note,
+                        upstream: note.upstream.filter(id => id !== deleteNoteId),
+                        downstream: note.downstream.filter(id => id !== deleteNoteId),
+                    };
+                }
+                return note; // Return the note unmodified if it's not related to the deleted one
+            });
+
+            return updatedNotes;
+        });
+
+        setSelectedNoteId(null)
+    }, [setNotes]);
+
+    return deleteNote;
+};
 
 export const useSaveAll = () => {
     const { notes } = useNotes()
@@ -82,72 +117,70 @@ export const useCreateNoteLink = () => {
 
     const createNoteLink = useCallback((upstreamId, downstreamId) => {
         setNotes(currentNotes => {
-            // Create a new array to avoid directly mutating the state
-            const newNotes = [...currentNotes];
-
-            // Find the index of the upstream and downstream notes
-            const upstreamNoteIndex = newNotes.findIndex(note => note.id === upstreamId);
-            const downstreamNoteIndex = newNotes.findIndex(note => note.id === downstreamId);
+            if (upstreamId === downstreamId) {
+                console.error('Operation cancelled: A note cannot link to itself.');
+                return currentNotes;
+            }
+            const upstreamNote = currentNotes.find(note => note.id === upstreamId);
+            const downstreamNote = currentNotes.find(note => note.id === downstreamId);
 
             // Safeguard checks if either note is not found
-            if (upstreamNoteIndex === -1 || downstreamNoteIndex === -1) {
+            if (!upstreamNote || !downstreamNote) {
                 console.error('One or both of the notes were not found.');
                 return currentNotes; // Return the original notes if there's an issue
             }
 
-            // Check if the upstream note is already a downstream of the downstream note
-            if (currentNotes[downstreamNoteIndex].downstream.includes(upstreamId)) {
-                console.error('Operation cancelled: A note cannot be both downstream and upstream of the same note.');
-                return currentNotes; // Cancel the operation
+            // Check if there is already a link in either direction
+            const alreadyLinked = upstreamNote.downstream.includes(downstreamId) || downstreamNote.upstream.includes(upstreamId) || downstreamNote.downstream.includes(upstreamId) || upstreamNote.upstream.includes(downstreamId);
+
+            if (alreadyLinked) {
+                console.error('Operation cancelled: A link already exists between these notes or a reciprocal link exists.');
+                return currentNotes;
             }
 
             // Proceed with updating the notes since the check passed
             return currentNotes.map(note => {
                 if (note.id === upstreamId) {
-                    return { ...note, downstream: [...note.downstream, downstreamId] };
+                    // Ensure downstream array exists before adding to it
+                    const updatedDownstream = note.downstream ? [...note.downstream, downstreamId] : [downstreamId];
+                    return { ...note, downstream: updatedDownstream };
                 } else if (note.id === downstreamId) {
-                    return { ...note, upstream: [...note.upstream, upstreamId] };
+                    // Ensure upstream array exists before adding to it
+                    const updatedUpstream = note.upstream ? [...note.upstream, upstreamId] : [upstreamId];
+                    return { ...note, upstream: updatedUpstream };
                 }
                 return note;
             });
         });
-    }, [setNotes]);
+    }, [notes, setNotes]); // Note: Removed 'setNotes' dependency if not used elsewhere
 
     return createNoteLink;
 };
 
-export const useDeleteNote = () => {
-    const { notes, setNotes, setSelectedNoteId } = useNotes();
+export const useDeleteLink = () => {
+    const { notes, setNotes, setSelectedLink } = useNotes();
 
-    const deleteNote = useCallback((deleteNoteId) => {
+    const deleteLink = useCallback((linkIdentifier) => {
+        // Extract the note ID and downstream ID from the link identifier
+        const [noteId, downstreamId] = linkIdentifier.split('>');
+
         setNotes(currentNotes => {
-            // First, find the note to be deleted
-            const noteToDelete = currentNotes.find(note => note.id === deleteNoteId);
-            if (!noteToDelete) return currentNotes; // If not found, return the current state
-
-            // Prepare arrays to hold IDs of notes to update
-            const idsToUpdate = new Set([...noteToDelete.upstream, ...noteToDelete.downstream]);
-
-            // Filter out the note to be deleted
-            const notesWithoutDeleted = currentNotes.filter(note => note.id !== deleteNoteId);
-
-            // Update upstream and downstream links only for related notes
-            const updatedNotes = notesWithoutDeleted.map(note => {
-                if (idsToUpdate.has(note.id)) {
-                    return {
-                        ...note,
-                        upstream: note.upstream.filter(id => id !== deleteNoteId),
-                        downstream: note.downstream.filter(id => id !== deleteNoteId),
-                    };
+            // Create updates for notes by removing the specified link
+            return currentNotes.map(note => {
+                if (note.id === noteId) {
+                    // Remove downstreamId from this note's downstream array
+                    const updatedDownstream = note.downstream.filter(id => id !== downstreamId);
+                    return { ...note, downstream: updatedDownstream };
+                } else if (note.id === downstreamId) {
+                    // Remove noteId from this note's upstream array, if it exists
+                    const updatedUpstream = note.upstream ? note.upstream.filter(id => id !== noteId) : [];
+                    return { ...note, upstream: updatedUpstream };
                 }
-                return note; // Return the note unmodified if it's not related to the deleted one
+                return note; // Return the note unchanged if it's not involved in the link
             });
-
-            return updatedNotes;
         });
-
-        setSelectedNoteId(null)
+        setSelectedLink(null)
     }, [setNotes]);
 
-    return deleteNote;
+    return deleteLink;
 };

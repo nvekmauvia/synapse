@@ -3,16 +3,17 @@ import { Vector2, Raycaster } from 'three';
 import { useEffect } from 'react';
 import { useInput } from '../context/InputContext';
 import { useNotes } from '../context/NotesContext';
-import { useDeleteNote } from '../utils/hooks';
+import { useDeleteNote, useDeleteLink } from '../utils/hooks';
 
 export const useSetupInputManager = () => {
     const { cameraControlsOn, setCameraControlsOn, setHoveredNote, setHoveredButton } = useInput();
-    const { editingNoteId, setEditingNoteId, clickedNote, selectedNoteId, setSelectedNoteId } = useNotes();
+    const { editingNoteId, setEditingNoteId, clickedNote, selectedNoteId, setSelectedNoteId, selectedLink, setSelectedLink } = useNotes();
 
     const raycaster = new Raycaster();
     const mousePosition = new Vector2();
 
     const deleteNote = useDeleteNote();
+    const deleteLink = useDeleteLink();
 
     // Mouse Hover
     useFrame(({ camera, scene, mouse }) => {
@@ -50,6 +51,7 @@ export const useSetupInputManager = () => {
                 //console.log(selectedNote)
                 setEditingNoteId(null);
                 setSelectedNoteId(null)
+                //setSelectedLink(null)
             }
         };
         document.addEventListener('click', handleDocumentClick);
@@ -80,6 +82,10 @@ export const useSetupInputManager = () => {
                 if (selectedNoteId && editingNoteId === null) {
                     deleteNote(selectedNoteId)
                 }
+                if (selectedLink !== null) {
+                    console.log('!!')
+                    deleteLink(selectedLink)
+                }
             }
         }
 
@@ -98,5 +104,5 @@ export const useSetupInputManager = () => {
             window.removeEventListener('keydown', handleKeyDown);
             window.removeEventListener('keyup', handleKeyUp);
         };
-    }, [setCameraControlsOn, setEditingNoteId, setSelectedNoteId, editingNoteId, selectedNoteId, deleteNote]);
+    }, [setCameraControlsOn, setEditingNoteId, setSelectedNoteId, editingNoteId, selectedNoteId, deleteNote, deleteLink, selectedLink]);
 };

@@ -42,7 +42,7 @@ const NoteObject = ({ position, noteReference }) => {
     if (meshRef.current) {
       // Main plane
       meshRef.current.children[0].userData.noteReferenceId = noteReference.id;
-      console.log(meshRef)
+      //console.log(meshRef)
     }
   }, [noteReference.id]);
 
@@ -192,7 +192,8 @@ const NoteObject = ({ position, noteReference }) => {
       <Plane args={[1, 1]}>
         <meshBasicMaterial color={meshColor} side={DoubleSide} transparent={true} opacity={0.8} />
       </Plane>
-      <LinkButton noteReference={noteReference} />
+      <LinkButton noteReference={noteReference} isDownLink={true} />
+      <LinkButton noteReference={noteReference} isDownLink={false} />
       <Html scaleFactor={10} center
         style={{
           width: `${100}px`, // Adjust based on the actual size of your Plane

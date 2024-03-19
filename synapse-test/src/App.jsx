@@ -1,13 +1,11 @@
-import React, { useEffect, useRef } from 'react';
 import NotesManager from "./components/NotesManager"
 import NoteObject from "./components/NoteObject"
 import OrbitManager from './components/OrbitManager'
 import Skybox from './components/Skybox'
 import { useSetupInputManager } from './services/inputManager';
 
-import OverlayGUI from './components/GUI/OverlayGUI'
 import ArrowIndicator from './components/ArrowIndicator'
-import NotesLinks from './components/NotesLinks'
+import LinkManager from './components/LinkManager'
 
 export const App = () => {
   // Input Manager
@@ -31,7 +29,7 @@ export const App = () => {
           </>
         )}
       </NotesManager>
-      <NotesLinks />
+      <LinkManager />
       <ArrowIndicator />
     </>
   )
