@@ -29,9 +29,9 @@ const initialNotes = () => {
 export const NotesProvider = ({ children }) => {
     const [notes, setNotes] = useState(initialNotes());
     const [editingNoteId, setEditingNoteId] = useState(null);
-    const [draggingNote, setDraggingNote] = useState(null);
-    const [selectedNoteId, setSelectedNoteId] = useState(false);
-    const [selectedLink, setSelectedLink] = useState(false);
+    const [draggingNoteId, setDraggingNoteId] = useState(null);
+    const [selectedNoteId, setSelectedNoteId] = useState(null);
+    const [selectedLink, setSelectedLink] = useState(null);
     const [clickedNote, setClickedNote] = useState(false);
     const [movingTimer, setMovingTimer] = useState(0.0);
     const [moveFactor, setMoveFactor] = useState(1);
@@ -47,8 +47,8 @@ export const NotesProvider = ({ children }) => {
         setSelectedLink,
         clickedNote,
         setClickedNote,
-        draggingNote,
-        setDraggingNote,
+        draggingNoteId,
+        setDraggingNoteId,
         movingTimer,
         setMovingTimer,
         moveFactor,

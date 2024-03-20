@@ -3,8 +3,8 @@ import { Plane } from '@react-three/drei';
 import { DoubleSide } from 'three';
 import { useInput } from '../context/InputContext';
 
-const leftButtonPosition = [-0.45, 0, 0.1];
-const rightButtonPosition = [0.45, 0, 0.1];
+const leftButtonPosition = [0, 0.4, 0];
+const rightButtonPosition = [0, -0.4, 0];
 
 const LinkButton = ({ noteReference, isDownLink }) => {
     const meshRef = useRef();
@@ -32,7 +32,6 @@ const LinkButton = ({ noteReference, isDownLink }) => {
         if (meshRef.current) {
             // Main plane
             meshRef.current.children[0].userData.buttonReferenceId = noteReference.id;
-            //console.log(meshRef)
         }
         // Cleanup global event listener on component unmount
         return () => {

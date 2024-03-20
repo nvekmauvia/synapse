@@ -32,3 +32,11 @@ body,
   min-height: 100px; /* Ensure it has a minimum height */
   width: 100%; /* Adjust width as needed */
 }
+
+.selection-box {
+  position: absolute;
+  display: none;
+  border: 2px dashed red;
+  pointerEvents: 'none'; /* Ensure it doesn't interfere with scene interaction */
+  z-index: 1000; /* Ensure it's above other elements */
+}

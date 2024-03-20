@@ -162,6 +162,9 @@ export const useDeleteLink = () => {
     const { notes, setNotes, setSelectedLink } = useNotes();
 
     const deleteLink = useCallback((linkIdentifier) => {
+        if (linkIdentifier === null || linkIdentifier === "") {
+            return
+        }
         // Extract the note ID and downstream ID from the link identifier
         const [noteId, downstreamId] = linkIdentifier.split('>');
 

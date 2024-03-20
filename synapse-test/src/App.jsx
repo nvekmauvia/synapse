@@ -3,7 +3,7 @@ import NotesManager from "./components/NotesManager"
 import NoteObject from "./components/NoteObject"
 import OrbitManager from './components/OrbitManager'
 import Skybox from './components/Skybox'
-import { useSetupInputManager } from './services/inputManager';
+import { SelectionBox, useSetupInputManager } from './services/inputManager';
 
 import ArrowIndicator from './components/ArrowIndicator'
 import LinkManager from './components/LinkManager'
@@ -41,6 +41,7 @@ export const App = () => {
           </>
         )}
       </NotesManager>
+      <SelectionBox />
       <LinkManager />
       <ArrowIndicator />
     </>

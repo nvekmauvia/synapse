@@ -18,7 +18,7 @@ const NoteObject = ({ position, noteReference }) => {
   const [meshColor, setMeshColor] = useState(new THREE.Color("#ffa500"));
   const {
     setNotes,
-    setDraggingNote,
+    setDraggingNoteId,
     editingNoteId,
     setEditingNoteId,
     setMovingTimer,
@@ -71,8 +71,8 @@ const NoteObject = ({ position, noteReference }) => {
       setOffset(offset);
     }
 
-    setDraggingNote(noteReference);
-  }, [camera, pointer, raycaster, noteReference]);
+    setDraggingNoteId(noteReference.id);
+  }, [camera, pointer, raycaster, noteReference.id, setDraggingNoteId, hoveredButton]);
 
   const stopDraggingGlobal = useCallback(() => {
     stopDragging();
@@ -80,7 +80,7 @@ const NoteObject = ({ position, noteReference }) => {
 
   const stopDragging = useCallback(() => {
     setIsDragging(false);
-    setDraggingNote(false);
+    setDraggingNoteId(null);
     setNotes((currentNotes) =>
       currentNotes.map((note) =>
         note.id === noteReference.id ? { ...note, position: meshRef.current.position.clone() } : note
@@ -210,7 +210,13 @@ const NoteObject = ({ position, noteReference }) => {
         <meshBasicMaterial color={meshColor} side={DoubleSide} transparent={true} opacity={0.8} />
       </Plane>
       {noteReference.isPinned && (
-        <Html position={[0.3, 0.5, 0]} scaleFactor={10}>
+        <Html
+          position={[0.3, 0.5, 0]}
+          scaleFactor={10}
+          style={{
+            pointerEvents: "none", // Make this div invisible to clicks    
+          }}
+        >
           <img src={pinIcon} style={{ width: '20px', height: '20px', color: 'red' }} alt="pinned" />
         </Html>
       )}

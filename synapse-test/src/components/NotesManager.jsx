@@ -4,12 +4,12 @@ import * as THREE from 'three'
 import { useNotes } from '../context/NotesContext';
 
 const calculateMovement = (notes) => {
-    const minCalcDistance = 5;
+    const minCalcDistance = 10;
 
-    const repulsionThresholdDistance = 2;
+    const repulsionThresholdDistance = 2.8;
     const repulsionStrength = 0.4;
 
-    const originAttractionStrength = 0.1;
+    const originAttractionStrength = 0.01 ;
 
     const linkDesiredDistance = 0.2;
     const linkAttractionCoefficient = 0.05;
@@ -17,7 +17,7 @@ const calculateMovement = (notes) => {
     const linkMinDistance = 2.3;
     const linkRepulsionCoefficient = 2;
 
-    const axisWeights = { x: 1.0, y: 1.5 , z: 1 }; // Customize these weights as need ed
+    const axisWeights = { x: 2, y: 0.5, z: 2 }; // Customize these weights as need ed
 
     for (let i = 0; i < notes.length; i++) {
         // General note flocking
@@ -45,7 +45,7 @@ const calculateMovement = (notes) => {
                 noteB.endPosition.add(repulsion);
             }
         }
-        
+
         // Attraction to origin
         let originDirection = new THREE.Vector3().subVectors(new THREE.Vector3(0, 0, 0), notes[i].endPosition);
         originDirection.normalize();
@@ -71,11 +71,11 @@ const calculateMovement = (notes) => {
                     noteDown.endPosition.sub(attraction);
                 }
 
-                // Ensure upstream note remains to the negative X-axis side of its downstream note
-                if (noteUp.endPosition.x + linkMinDistance > noteDown.endPosition.x) {
-                    const adjustX = Math.abs(noteUp.endPosition.x + linkMinDistance - noteDown.endPosition.x) / linkRepulsionCoefficient;
-                    noteUp.endPosition.x -= adjustX;
-                    noteDown.endPosition.x += adjustX;
+                // Ensure upstream note remains to the positive Y-axis side of its downstream note
+                if ((noteUp.endPosition.y - linkMinDistance) < noteDown.endPosition.y) {
+                    const adjustY = Math.abs(linkMinDistance - (noteUp.endPosition.y - noteDown.endPosition.y)) / linkRepulsionCoefficient;
+                    noteUp.endPosition.y += adjustY;
+                    noteDown.endPosition.y -= adjustY;
                 }
             }
         });
@@ -94,6 +94,7 @@ const NotesManager = ({ children }) => {
         setNotes(currentNotes =>
             currentNotes.map(note => {
                 if (!note.endPosition || note.isPinned) {
+                    note.endPosition = note.position.clone()
                     return note;
                 }
                 note.position.lerp(note.endPosition, 0.2)

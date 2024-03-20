@@ -4,7 +4,7 @@ import { useThree } from '@react-three/fiber';
 import { useNotes } from '../context/NotesContext';
 import { useInput } from '../context/InputContext';
 import { LinkLine } from './LinkLine';
-import { useCreateNoteLink } from '../utils/hooks';
+import { useCreateNoteLink, useCreateNewNote } from '../utils/hooks';
 
 const SetLinks = ({ notes }) => {
   return (
@@ -18,8 +18,8 @@ const SetLinks = ({ notes }) => {
           const endPosition = new THREE.Vector3().copy(downstreamNote.position);
 
           // Adjust start and end positions
-          startPosition.x += 0.5; // Assuming the note's width is 1 unit
-          endPosition.x -= 0.5;
+          startPosition.y -= 0.5; // Assuming the note's width is 1 unit
+          endPosition.y += 0.5;
 
           return <LinkLine key={`${note.id}-${downstreamId}`} start={startPosition} end={endPosition} linkId={`${note.id}>${downstreamId}`} />;
         }) || []
@@ -38,7 +38,10 @@ const LinkManager = () => {
     linkingDown,
     setLinkingNote
   } = useInput()
-  const createNoteLink = useCreateNoteLink(); // Use the hook
+
+  const createNote = useCreateNewNote();
+  const createNoteLink = useCreateNoteLink();
+
 
   // Calculate mouse pos
   useEffect(() => {
@@ -83,6 +86,9 @@ const LinkManager = () => {
           createNoteLink(hoveredNote, linkingNote);
         }
       }
+      if (linkingNote && hoveredNote === null) {
+        createNote();
+      }
       setLinkingNote(null); // Reset the linking note state
     };
 
@@ -101,7 +107,7 @@ const LinkManager = () => {
     if (!note) return null;
 
     const startPosition = new THREE.Vector3().copy(note.position);
-    startPosition.x += linkingDown ? 0.5 : -0.5; // Adjust according to note size
+    startPosition.y += linkingDown ? -0.5 : 0.5; // Adjust according to note size
 
     return <LinkLine key="dynamic-link" start={startPosition} end={mousePosition} linkId={null} />;
   }, [linkingNote, mousePosition, notes]);
