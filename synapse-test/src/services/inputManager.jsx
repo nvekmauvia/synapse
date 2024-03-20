@@ -9,131 +9,67 @@ import { useNotes } from '../context/NotesContext';
 import { useDeleteNote, useDeleteLink } from '../utils/hooks';
 
 import { SelectionBox } from '../components/SelectionBox';
+import { SelectionHelper } from '../components/SelectionHelper';
 
 import '../index.css'
 
 export const Selection = () => {
-    const { gl, scene, camera } = useThree(); // Extract camera here
-    const [isSelecting, setIsSelecting] = useState(false);
-    const [startPoint, setStartPoint] = useState({ x: 0, y: 0 });
-    const [endPoint, setEndPoint] = useState({ x: 0, y: 0 });
-    const selectionDivRef = useRef(null); // Reference to the selection div
-    const selectedObjects = useRef(null);
-    const { hoveredNote } = useInput();
+    const { camera, scene, gl: renderer } = useThree();
 
-    useEffect(() => {
-        const updateVisualSelectionBox = () => {
-            if (!isSelecting) {
-                if (selectionDivRef.current) {
-                    selectionDivRef.current.style.display = 'none';
-                }
-                return;
+    const selectionBox = new SelectionBox(camera, scene);
+    const helper = new SelectionHelper(renderer, 'selectBox');
+
+    document.addEventListener('pointerdown', function (event) {
+
+        for (const item of selectionBox.collection) {
+            //item.material.emissive.set(0x000000);
+        }
+        selectionBox.startPoint.set(
+            (event.clientX / window.innerWidth) * 2 - 1,
+            - (event.clientY / window.innerHeight) * 2 + 1,
+            0.5);
+
+    });
+
+    document.addEventListener('pointermove', function (event) {
+        if (helper.isDown) {
+
+            for (let i = 0; i < selectionBox.collection.length; i++) {
+                //console.log(selectionBox.collection[i])
+                //selectionBox.collection[i].material.emissive.set(0x000000);
             }
 
-            const minX = Math.min(startPoint.x, endPoint.x);
-            const maxX = Math.max(startPoint.x, endPoint.x);
-            const minY = Math.min(startPoint.y, endPoint.y);
-            const maxY = Math.max(startPoint.y, endPoint.y);
+            selectionBox.endPoint.set(
+                (event.clientX / window.innerWidth) * 2 - 1,
+                - (event.clientY / window.innerHeight) * 2 + 1,
+                0.5);
 
-            if (selectionDivRef.current) {
-                selectionDivRef.current.style.left = `${minX}px`;
-                selectionDivRef.current.style.top = `${minY}px`;
-                selectionDivRef.current.style.width = `${maxX - minX}px`;
-                selectionDivRef.current.style.height = `${maxY - minY}px`;
-                selectionDivRef.current.style.display = 'block';
-            }
-        };
+            const allSelected = selectionBox.select();
 
-        function onPointerDown(e) {
-            if (true) {
-                const rect = gl.domElement.getBoundingClientRect();
-                const x = e.clientX - rect.width / 2;
-                const y = e.clientY - rect.height / 2;
-                setIsSelecting(true);
-                setStartPoint({ x, y });
-                setEndPoint({ x, y });
+            for (let i = 0; i < allSelected.length; i++) {
+                //console.log(selectionBox.collection[i])
+                //allSelected[i].material.emissive.set(0xffffff);
             }
         }
+    });
 
-        function onPointerMove(e) {
-            if (isSelecting) {
-                const rect = gl.domElement.getBoundingClientRect();
-                const x = e.clientX - rect.width / 2;
-                const y = e.clientY - rect.height / 2;
+    document.addEventListener('pointerup', function (event) {
 
-                setEndPoint({ x, y });
-                updateVisualSelectionBox();
+        selectionBox.endPoint.set(
+            (event.clientX / window.innerWidth) * 2 - 1,
+            - (event.clientY / window.innerHeight) * 2 + 1,
+            0.5);
+
+        const allSelected = selectionBox.select();
+
+        for (let i = 0; i < allSelected.length; i++) {
+            if (selectionBox.collection[i].userData.noteReferenceId) {
+                console.log(selectionBox.collection[i])
             }
+            //allSelected[i].material.emissive.set(0xffffff);
         }
 
-        function onPointerUp(e) {
-            setIsSelecting(false);
-            checkIntersections();
-            updateVisualSelectionBox(); // Hide the selection box
-        }
-
-        window.addEventListener('pointerdown', onPointerDown);
-        window.addEventListener('pointermove', onPointerMove);
-        window.addEventListener('pointerup', onPointerUp);
-
-        return () => {
-            window.removeEventListener('pointerdown', onPointerDown);
-            window.removeEventListener('pointermove', onPointerMove);
-            window.removeEventListener('pointerup', onPointerUp);
-        };
-    }, [isSelecting, camera, gl, scene, startPoint, endPoint]);
-
-    const checkIntersections = () => {
-        // Calculate corners of the selection area in NDC
-        const ndcStart = new Vector3(
-            (startPoint.x / window.innerWidth) * 2 - 1,
-            -(startPoint.y / window.innerHeight) * 2 + 1,
-            -1
-        );
-        const ndcEnd = new Vector3(
-            (endPoint.x / window.innerWidth) * 2 - 1,
-            -(endPoint.y / window.innerHeight) * 2 + 1,
-            1
-        );
-
-        // Unproject corners to world space
-        const worldStart = ndcStart.unproject(camera);
-        const worldEnd = ndcEnd.unproject(camera);
-
-        // Use the camera position and the two unprojected points to define the frustum
-        const frustum = new Frustum();
-        const projScreenMatrix = new Matrix4();
-        projScreenMatrix.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
-        frustum.setFromProjectionMatrix(projScreenMatrix);
-
-        // Now check if objects intersect with the frustum
-        selectedObjects.current = [];
-        scene.traverse((child) => {
-            if (child.isMesh) {
-                if (frustum.intersectsObject(child)) {
-                    if (child.userData.noteReferenceId) {
-                        selectedObjects.current.push(child);
-                    }
-                }
-            }
-        });
-
-        console.log(selectedObjects.current);
-    };
-
-    return (
-        <Html>
-            <div ref={selectionDivRef}
-                //className="selection-box"
-                style={{
-                    position: 'absolute',
-                    display: 'none',
-                    border: '2px dashed #ff0000',
-                    pointerEvents: 'none'
-                }}>
-            </div>
-        </Html>
-    );
+    });
 };
 
 export const useSetupInputManager = () => {

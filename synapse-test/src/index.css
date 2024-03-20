@@ -40,3 +40,10 @@ body,
   pointerEvents: 'none'; /* Ensure it doesn't interfere with scene interaction */
   z-index: 1000; /* Ensure it's above other elements */
 }
+
+.selectionBox {
+  border: 2px dashed #ff0000;
+  position: absolute;
+  pointer-events: none;
+  z-index: 10;
+}
